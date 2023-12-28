@@ -14,13 +14,24 @@ data "aws_eks_cluster_auth" "myapp-cluster" {
 }
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
-  version = "18.21.0"
+  version = "19.0"
 
   cluster_name = "myapp-eks-cluster"  
-  cluster_version = "1.22"
+  cluster_version = "1.27"
 
   subnet_ids = module.myapp-vpc.private_subnets
   vpc_id = module.myapp-vpc.vpc_id
+  cluster_addons = {
+    coredns = {
+      most_recent = true
+    }
+    kube-proxy = {
+      most_recent = true
+    }
+    vpc-cni = {
+      most_recent = true
+    }
+  }
 
   tags = {
     environment = "development"
@@ -29,9 +40,9 @@ module "eks" {
 
   eks_managed_node_groups = {
     dev = {
-      min_size     = 1
-      max_size     = 1
-      desired_size = 1
+      min_size     = 2
+      max_size     = 3
+      desired_size = 2
 
       instance_types = ["t2.small"]
     }
